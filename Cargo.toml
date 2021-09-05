@@ -1,0 +1,25 @@
+[package]
+name = "matrixbiclique"
+version = "0.1.0"
+authors = ["Dominik Köppl <dominik.koeppl@uni-dortmund.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+more-asserts = "0.2.1"
+byte_string = "1.0.0"
+cdivsufsort = "2.0.0"
+log = "0.4.0"
+env_logger = "0.8.3"
+#clap = "3.0.0-beta.2"
+num = "0.1"
+segment-tree = "2"
+rand = "0.8.1"
+approx = "0.5.0"
+byteorder = "1.4.3"
+
+[[bin]]
+name = "asciigraph2ceciliabin"
+path = "src/asciigraph2ceciliabin.rs"
+
