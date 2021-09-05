@@ -23,3 +23,6 @@ byteorder = "1.4.3"
 name = "asciigraph2ceciliabin"
 path = "src/asciigraph2ceciliabin.rs"
 
+[[bin]]
+name = "ceciliatxt2ceciliabin"
+path = "src/ceciliatxt2ceciliabin.rs"
