@@ -26,3 +26,8 @@ path = "src/asciigraph2ceciliabin.rs"
 [[bin]]
 name = "ceciliatxt2ceciliabin"
 path = "src/ceciliatxt2ceciliabin.rs"
+
+[[bin]]
+name = "ceciliabin2asciigraph"
+path = "src/ceciliabin2asciigraph.rs"
+

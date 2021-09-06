@@ -29,7 +29,7 @@ fn main() {
     {
         let reader = std::io::BufReader::new(common::stream_or_stdin(None));
         let mut writer = std::io::BufWriter::new(
-            std::fs::OpenOptions::new().write(true).read(false).create(true).open("output.bin").expect("no file found")
+            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open("output.bin").expect("no file found")
         );
         //common::stream_or_stdout(None);
 

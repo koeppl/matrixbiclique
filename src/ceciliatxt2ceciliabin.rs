@@ -25,12 +25,12 @@ fn main() {
     // let writer = stream_or_stdout(&matches.value_of("output"));
 
     let mut edge_counter : u64 = 0;
-    let mut vertex_counter: u64 = 0;
+    let mut max_node_id: u64 = 0;
 
     {
         let reader = std::io::BufReader::new(common::stream_or_stdin(None));
         let mut writer = std::io::BufWriter::new(
-            std::fs::OpenOptions::new().write(true).read(false).create(true).open("output.bin").expect("no file found")
+            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open("output.bin").expect("no file found")
         );
         //common::stream_or_stdout(None);
 
@@ -51,7 +51,7 @@ fn main() {
             assert_gt!(line_no, 0);
             assert_lt!(line_no, std::u32::MAX as u64);
             writer.write_i32::<LittleEndian>(-(line_no as i32)).unwrap(); 
-            if line_no > vertex_counter { vertex_counter = line_no; }
+            if line_no > max_node_id { max_node_id = line_no; }
             println!("lineno: {}", line_no);
 
             for number in splittedline[1].split(' ').map(|x| -> Option<u32> { 
@@ -84,7 +84,7 @@ fn main() {
     }, 0u64);
 
     write_handle.seek(std::io::SeekFrom::Start(0)).unwrap();
-    write_handle.write_u32::<LittleEndian>(vertex_counter as u32).unwrap();
+    write_handle.write_u32::<LittleEndian>(max_node_id as u32).unwrap();
     write_handle.write_u32::<LittleEndian>(edge_counter as u32).unwrap();
 
     // let bwt = match use_matrix { 
