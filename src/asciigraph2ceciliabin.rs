@@ -18,15 +18,16 @@ fn main() {
     let matches = clap_app!(count_r =>
         (about: "computes Cecilia's bin-format from an ASCIIGraph")
         (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin)")
-        (@arg output:  -o --outfile  +takes_value +required "filename for the binary output")
+        (@arg output: -o --outfile  +takes_value +required "filename for the binary output")
     ).get_matches();
 
     let mut edge_counter : u64 = 0;
+    let output_filename = &matches.value_of("output").unwrap();
 
     {
         let reader = std::io::BufReader::new(common::stream_or_stdin(matches.value_of("input")));
         let mut writer = std::io::BufWriter::new(
-            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open(&matches.value_of("output").unwrap()).expect("no file found")
+            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open(output_filename).expect("no file found")
         );
         //common::stream_or_stdout(None);
 
@@ -42,7 +43,11 @@ fn main() {
         let mut line_no : u64 = 1;
         for line in lines_it {
             writer.write_i32::<LittleEndian>(-(line_no as i32)).unwrap(); 
-            for number in line.unwrap().split(' ').map(|x| x.trim().parse::<u32>().unwrap()+1) {
+            for number_string in line.unwrap().split(' ') {
+                let y = number_string.trim();
+                if y.len() == 0 { continue; }
+
+                let number = y.parse::<u32>().unwrap()+1;
                 assert_lt!(number, std::u32::MAX);
                 writer.write_u32::<LittleEndian>(number).unwrap(); 
                 edge_counter += 1;
@@ -53,7 +58,7 @@ fn main() {
         }
         writer.flush().unwrap();
     }
-    let mut write_handle = std::fs::OpenOptions::new().write(true).read(true).create(false).open("output.bin").expect("no file found");
+    let mut write_handle = std::fs::OpenOptions::new().write(true).truncate(false).read(true).create(false).open(output_filename).expect("no file found");
     assert_eq!( {
     write_handle.seek(std::io::SeekFrom::Start(4)).unwrap();
     write_handle.read_u32::<LittleEndian>().unwrap()

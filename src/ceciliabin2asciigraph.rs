@@ -75,6 +75,8 @@ fn main() {
 
     let num_nodes = nodes_reader.read_u32::<LittleEndian>().unwrap() as usize;
     let num_edges = nodes_reader.read_u32::<LittleEndian>().unwrap();
+    info!("num_nodes : {}", num_nodes);
+    info!("num_edges : {}", num_edges);
 
 
     let mut adjacency_matrix = vec![Vec::with_capacity(1); num_nodes];
@@ -99,7 +101,9 @@ fn main() {
     }
     assert_eq!(edge_counter, num_edges);
 
-    println!("len = {} max = {}", adjacency_matrix.len(), max_biclique_node_id);
+    info!("length of adjacency list: {}", adjacency_matrix.len());
+    info!("maximum biclique node id: {}", max_biclique_node_id);
+
     writeln!(writer, "{}", std::cmp::max(num_nodes,max_biclique_node_id+1)).unwrap();
     for row_id in 0..adjacency_matrix.len() {
         let row = {
@@ -114,12 +118,18 @@ fn main() {
             }
         };
         writer.write(row.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ").as_bytes()).unwrap();
+        if row.len() > 0 {
+            writer.write(" ".as_bytes()).unwrap();
+        }
         writer.write("\n".as_bytes()).unwrap();
     }
     for row_id in adjacency_matrix.len()..max_biclique_node_id+1 {
         let mut row = bicliques[node2biclique[&(row_id as u32)] as usize].clone();
         row.retain(|&x| x != row_id as u32);
         writer.write(row.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ").as_bytes()).unwrap();
+        if row.len() > 0 {
+            writer.write(" ".as_bytes()).unwrap();
+        }
         writer.write("\n".as_bytes()).unwrap();
     }
     writer.flush().unwrap();

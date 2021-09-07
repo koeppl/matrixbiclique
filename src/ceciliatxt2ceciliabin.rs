@@ -18,17 +18,17 @@ fn main() {
     let matches = clap_app!(count_r =>
         (about: "computes Cecilia's bin-format from Cecilia's text format")
         (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin)")
-        (@arg input:  -o --outfile  +takes_value +required "filename for the binary output")
+        (@arg output:  -o --outfile  +takes_value +required "filename for the binary output")
     ).get_matches();
 
     let mut edge_counter : u64 = 0;
     let mut max_node_id: u64 = 0;
+    let output_filename = matches.value_of("output").unwrap();
 
     {
         let reader = std::io::BufReader::new(common::stream_or_stdin(matches.value_of("input")));
         let mut writer = std::io::BufWriter::new(
-            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open(&matches.value_of("output").unwrap()).expect("no file found")
-        );
+            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open(output_filename).expect("no file found"));
 
 
 
@@ -48,7 +48,7 @@ fn main() {
             assert_lt!(line_no, std::u32::MAX as u64);
             writer.write_i32::<LittleEndian>(-(line_no as i32)).unwrap(); 
             if line_no > max_node_id { max_node_id = line_no; }
-            println!("lineno: {}", line_no);
+            // println!("lineno: {}", line_no);
 
             for number in splittedline[1].split(' ').map(|x| -> Option<u32> { 
                 let y = x.trim();
@@ -65,7 +65,7 @@ fn main() {
                         if num > 0 && num != line_no as u32 {
                             writer.write_u32::<LittleEndian>(num).unwrap(); 
                             edge_counter += 1;
-                            println!("write {}", num);
+                            // println!("write {}", num);
                         }
                     }
                 }
@@ -74,10 +74,13 @@ fn main() {
         }
         writer.flush().unwrap();
     }
-    let mut write_handle = std::fs::OpenOptions::new().write(true).read(true).create(false).open("output.bin").expect("no file found");
+    let mut write_handle = std::fs::OpenOptions::new().write(true).truncate(false).read(true).create(false).open(output_filename).expect("no file found");
     assert_eq!( {
     write_handle.read_u64::<LittleEndian>().unwrap()
     }, 0u64);
+
+    info!("num_nodes : {}", max_node_id);
+    info!("num_edges : {}", edge_counter);
 
     write_handle.seek(std::io::SeekFrom::Start(0)).unwrap();
     write_handle.write_u32::<LittleEndian>(max_node_id as u32).unwrap();
