@@ -1,9 +1,9 @@
 extern crate env_logger;
 
+#[macro_use] extern crate clap;
 extern crate log;
-use log::{info,debug};
+use log::info;
 
-use std::io;
 use std::io::prelude::*;
 use std::io::BufRead;
 use byteorder::{LittleEndian, WriteBytesExt, ReadBytesExt};
@@ -15,24 +15,20 @@ use byteorder::{LittleEndian, WriteBytesExt, ReadBytesExt};
 
 
 fn main() {
-    // let matches = clap_app!(count_r =>
-    //     (about: "computes the BWT via divsufsort")
-    //     (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin")
-    //     (@arg input:  -o --outfile  +takes_value "the binary output file (otherwise writo to stdout")
-    // ).get_matches();
-    //
-    // let reader = stream_or_stdin(&matches.value_of("input"));
-    // let writer = stream_or_stdout(&matches.value_of("output"));
+    let matches = clap_app!(count_r =>
+        (about: "computes Cecilia's bin-format from Cecilia's text format")
+        (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin)")
+        (@arg input:  -o --outfile  +takes_value +required "filename for the binary output")
+    ).get_matches();
 
     let mut edge_counter : u64 = 0;
     let mut max_node_id: u64 = 0;
 
     {
-        let reader = std::io::BufReader::new(common::stream_or_stdin(None));
+        let reader = std::io::BufReader::new(common::stream_or_stdin(matches.value_of("input")));
         let mut writer = std::io::BufWriter::new(
-            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open("output.bin").expect("no file found")
+            std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open(&matches.value_of("output").unwrap()).expect("no file found")
         );
-        //common::stream_or_stdout(None);
 
 
 

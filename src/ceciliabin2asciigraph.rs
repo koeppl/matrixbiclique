@@ -1,9 +1,10 @@
 extern crate env_logger;
 
-extern crate log;
-use log::{info,debug};
+#[macro_use] extern crate clap;
 
-use std::io;
+extern crate log;
+use log::info;
+
 use std::io::prelude::*;
 use std::io::BufRead;
 use byteorder::{LittleEndian, WriteBytesExt, ReadBytesExt};
@@ -15,65 +16,60 @@ use byteorder::{LittleEndian, WriteBytesExt, ReadBytesExt};
 
 
 fn main() {
-    // let matches = clap_app!(count_r =>
-    //     (about: "computes the BWT via divsufsort")
-    //     (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin")
-    //     (@arg input:  -o --outfile  +takes_value "the binary output file (otherwise writo to stdout")
-    // ).get_matches();
-    //
-    // let reader = stream_or_stdin(&matches.value_of("input"));
-    // let writer = stream_or_stdout(&matches.value_of("output"));
+    let matches = clap_app!(count_r =>
+        (about: "computes an ASCIIGraph from Cecilia's bin-format plus cliques in text format")
+        (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin)")
+        (@arg clique:  -c --cliquefile  +takes_value "the clique file")
+        (@arg output:  -o --outfile  +takes_value "filename for the binary output")
+    ).get_matches();
 
-    // let mut edge_counter : u64 = 0;
-    // let mut vertex_counter: u64 = 0;
-    //
-    // {
-    let mut nodes_reader = std::io::BufReader::new(
-        std::fs::OpenOptions::new().write(false).read(true).create(false).open("remain.bin").expect("no file found")
-    );
+    let mut nodes_reader = common::stream_or_stdin(matches.value_of("input"));
 
 
     let mut node2biclique = std::collections::HashMap::new(); //@ stores for each node ID on the left side of a biclique the index in the biclique array storing all nodes on the right side
 
     let mut bicliques = Vec::<Vec<u32>>::new();
 
-    match std::fs::OpenOptions::new().write(false).read(true).create(false).open("clique.txt") {
-        Err(_) => (),
-        Ok(file_handle) =>  {
-            let reader = std::io::BufReader::new(file_handle);
-            for line in reader.lines() {
-                let parsed_line = line.unwrap();
-                let splittedline = parsed_line.split('-').collect::<Vec<&str>>();
-                assert_eq!(splittedline.len(), 2);
+    match matches.value_of("clique") {
+        None => (),
+        Some(cliquefilename) => {
+            match std::fs::OpenOptions::new().write(false).read(true).create(false).open(cliquefilename) {
+                Err(_) => (),
+                Ok(file_handle) =>  {
+                    let reader = std::io::BufReader::new(file_handle);
+                    for line in reader.lines() {
+                        let parsed_line = line.unwrap();
+                        let splittedline = parsed_line.split('-').collect::<Vec<&str>>();
+                        assert_eq!(splittedline.len(), 2);
 
-                bicliques.push(
-                    splittedline[1].split(' ').map(|x| -> Option<u32> { 
-                        let y = x.trim();
-                        if y.len() > 0  {
-                            let i = y.parse::<u32>().unwrap();
-                            assert_gt!(i, 0);
-                            Some(i-1)
-                        } else {
-                            None
+                        bicliques.push(
+                            splittedline[1].split(' ').map(|x| -> Option<u32> { 
+                                let y = x.trim();
+                                if y.len() > 0  {
+                                    let i = y.parse::<u32>().unwrap();
+                                    assert_gt!(i, 0);
+                                    Some(i-1)
+                                } else {
+                                    None
+                                }
+                            }).filter(|x| x.is_some()).map(|x| x.unwrap()).collect());
+                        for x in splittedline[0].split(' ') {
+                            let y = x.trim();
+                            if y.len() > 0  {
+                                let key = y.parse::<u32>().unwrap();
+                                assert_gt!(key, 0);
+                                node2biclique.insert(key-1, bicliques.len()-1);
+                            } 
                         }
-                    }).filter(|x| x.is_some()).map(|x| x.unwrap()).collect());
-                for x in splittedline[0].split(' ') {
-                    let y = x.trim();
-                    if y.len() > 0  {
-                        let key = y.parse::<u32>().unwrap();
-                        assert_gt!(key, 0);
-                        node2biclique.insert(key-1, bicliques.len()-1);
-                    } 
+                    }
                 }
             }
         }
     };
     let max_biclique_node_id = node2biclique.keys().fold(std::u32::MIN, |a,b| a.max(*b)) as usize;
 
+    let mut writer = common::stream_or_stdout(matches.value_of("output"));
 
-    let mut writer = std::io::BufWriter::new(
-        std::fs::OpenOptions::new().write(true).truncate(true).read(false).create(true).open("output.bin").expect("no file found")
-    );
     //common::stream_or_stdout(None);
 
 
