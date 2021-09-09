@@ -83,7 +83,7 @@ fn main() {
        // Vec::with_capacity(num_nodes);
     let mut current_node = 0;
 
-    let mut edge_counter = 0;
+    let mut edge_counter : u64 = 0;
     loop {
         match nodes_reader.read_i32::<LittleEndian>() {
             Err(_) => break,
@@ -99,7 +99,7 @@ fn main() {
             }
         }
     }
-    assert_eq!(edge_counter, num_edges);
+    assert_eq!(edge_counter, num_edges as u64);
 
     info!("length of adjacency list: {}", adjacency_matrix.len());
     info!("maximum biclique node id: {}", max_biclique_node_id);
