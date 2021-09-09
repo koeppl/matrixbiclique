@@ -158,7 +158,7 @@ fn main() {
 
     match matches.value_of("output") {
         None =>  {
-            let to_node_bound = std::cmp::max(max_adjacency_to_node as usize, max_biclique_to_node) + 1; 
+            let to_node_bound = std::cmp::max(adjacency_lists.len(), std::cmp::max(max_adjacency_to_node as usize, max_biclique_to_node) + 1); 
             let mut input_vector = vec![1.; to_node_bound];
             for iter in 0..10 {
                 let now = Instant::now();
@@ -187,9 +187,9 @@ fn main() {
                     hash += output_vector[i];
                 }
                 std::mem::swap(&mut input_vector, &mut output_vector);
-                println!("RESULT file={file} action=pagerank algo=rustpagerank bicliques={bicliques} time_ms={time} hash={hash} iter={iter}", 
+                println!("RESULT file={file} action=pagerank algo=rustpagerank bicliques={bicliques} time_ns={time} hash={hash} iter={iter}", 
                          file=input_filename,
-                         time=now.elapsed().as_millis(),
+                         time=now.elapsed().as_nanos(),
                          bicliques=clique_filename,
                          hash=hash,
                          iter=iter
