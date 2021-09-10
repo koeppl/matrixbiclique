@@ -7,20 +7,19 @@ use log::info;
 
 use std::io::prelude::*;
 use std::io::BufRead;
-use byteorder::{LittleEndian, WriteBytesExt, ReadBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt};
 
 #[macro_use] extern crate more_asserts;
 
 
 #[allow(dead_code)] mod common;
 
-
 fn main() {
     let matches = clap_app!(count_r =>
         (about: "computes an ASCIIGraph from Cecilia's bin-format plus cliques in text format")
         (@arg input:  -i --infile  +takes_value "the input file to read (otherwise read from stdin)")
         (@arg clique:  -c --cliquefile  +takes_value "the clique file")
-        (@arg output:  -o --outfile  +takes_value "filename for the binary output")
+        (@arg output:  -o --outfile  +takes_value "filename for the binary output. If no output is given, it computes the page rank as explained in the paper.")
     ).get_matches();
 
     let mut nodes_reader = common::stream_or_stdin(matches.value_of("input"));
