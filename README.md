@@ -26,9 +26,17 @@ We can run
 to generate a CeciliaGraph from the remaining nodes.
 
 Finally, we can 
-- restore the original ASCIIGraph via
- `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph -o newASCIIGraphFileName`
 - run a PageRank benchmark on the original graph
  `cargo run --release --bin ceciliabin2asciigraph -- -i CeciliaGraphFileName`
 - run a PageRank benchmark on the remaining graph with the bicliques
  `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph`
+- run a PageRank benchmark on the remaining graph with the bicliques and use the original graph to correct missing self-loops or self-loops that have been introduced
+ `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph -g CeciliaGraphFileName`
+- restore the original ASCIIGraph (modulo self loops) via
+ `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph -o newASCIIGraphFileName`
+
+Caveats:
+
+- The biclique extraction tool introduces self-loops, which we remove in the remaining nodes.
+Hence, we may remove self-loops present in the original graph, or might introduce self-loops that are indirectly given by a biclique.
+Therefore, we provide the program argument `-g` to remove them by an additional pass on the original graph.
