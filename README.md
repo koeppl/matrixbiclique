@@ -13,7 +13,7 @@ It consists of:
 
 `cargo run --release --bin ceciliatxt2ceciliabin -- -i ASCIIGraphFileName -o CeciliaGraphFileName`
 
-Next, we run Cecilia's `vnmextract` program that creates files for the extracted bicliques and files for the remaining nodes:
+Next, we run [Cecilia's `vnmextract` program](https://github.com/koeppl/biclique_extraction) that creates files for the extracted bicliques and files for the remaining nodes:
 
 `./vnmextract $i 1 1 100 500,100 ${basename} 4`
 
