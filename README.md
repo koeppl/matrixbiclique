@@ -15,7 +15,7 @@ It consists of:
 
 Next, we run [Cecilia's `vnmextract` program](https://github.com/koeppl/biclique_extraction) that creates files for the extracted bicliques and files for the remaining nodes:
 
-`./vnmextract $i 1 1 100 500,100 ${basename} 4`
+`./vnmextract CeciliaGraphFileName 1 1 100 500,100 ${basename} 4`
 
 where `${basename}` is the filename used as a prefix for the generated files.
 The most recent file containing all remaining nodes is 
