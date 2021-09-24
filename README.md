@@ -18,22 +18,34 @@ Next, we run Cecilia's `vnmextract` program that creates files for the extracted
 `./vnmextract $i 1 1 100 500,100 ${basename} 4`
 
 where `${basename}` is the filename used as a prefix for the generated files.
-The most recent file containing all remaining nodes is `ls --sort time biclique/${basename}-it-* | head -n1 > RemainingGraph`
-The bicliques can be concatenated into a single file `cat "$kBicliqueDir/${basename}-biclique"*.txt > BiCliqueFile`
+The most recent file containing all remaining nodes is 
+
+`ls --sort time biclique/${basename}-it-* | head -n1 > RemainingGraph`
+
+The bicliques can be concatenated into a single file 
+
+`cat "$kBicliqueDir/${basename}-biclique"*.txt > BiCliqueFile`
+.
 
 We can run
+
 `cargo run --release --bin ceciliatxt2ceciliabin -- -i RemainingGraph -o RemainingCeciliaGraph`
+
 to generate a CeciliaGraph from the remaining nodes.
 
 Finally, we can 
+
 - run a PageRank benchmark on the original graph
- `cargo run --release --bin ceciliabin2asciigraph -- -i CeciliaGraphFileName`
+
+`cargo run --release --bin ceciliabin2asciigraph -- -i CeciliaGraphFileName`
+
 - run a PageRank benchmark on the remaining graph with the bicliques
  `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph`
 - run a PageRank benchmark on the remaining graph with the bicliques and use the original graph to correct missing self-loops or self-loops that have been introduced
  `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph -g CeciliaGraphFileName`
 - restore the original ASCIIGraph (modulo self loops) via
  `cargo run --release --bin ceciliabin2asciigraph -- -c BiCliqueFile -i RemainingCeciliaGraph -o newASCIIGraphFileName`
+
 
 Caveats:
 
