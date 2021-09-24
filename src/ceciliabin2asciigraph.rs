@@ -50,6 +50,11 @@ fn main() {
         Some(filename) => filename
     };
 
+    let genuine_filename = match matches.value_of("genuine") {
+        None => "none",
+        Some(filename) => filename
+    };
+
     use std::time::Instant;
     let now = Instant::now();
 
@@ -168,8 +173,8 @@ fn main() {
             }
 
             let mut genuine_reader = common::stream_or_stdin(Some(genuinefilename));
-            let num_genuine_nodes = genuine_reader.read_u32::<LittleEndian>().unwrap(); //nodes
-            let num_genuine_edges = genuine_reader.read_u32::<LittleEndian>().unwrap(); //edges
+            genuine_reader.read_u32::<LittleEndian>().unwrap(); //nodes
+            genuine_reader.read_u32::<LittleEndian>().unwrap(); //edges
             let mut uninitialized = true;
             // assert_le!(num_genuine_nodes as usize, num_nodes);
             // assert_le!(num_genuine_edges, num_edges);
@@ -279,10 +284,27 @@ fn main() {
         node_degrees
     };
 
-    println!("RESULT file={file} action=load algo=rustpagerank bicliques={bicliques} time_ms={time} ", 
+    println!("RESULT nodefile={nodefile} action=load algo=rustpagerank bicliquefilename={bicliquefilename} time_ms={time} 
+    genuinefile={genuinefile} \
+falsly_added_bicliques={falsly_added_bicliques} \
+falsly_removed_bicliques={falsly_removed_bicliques} \
+remaining_edges={remaining_edges} \
+biclique_from_edges={biclique_from_edges} \
+biclique_to_edges={biclique_to_edges} \
+total_edges={total_edges} \
+number_nodes={number_nodes}
+        ", 
              time=now.elapsed().as_millis(),
-             file=input_filename,
-             bicliques=clique_filename
+             nodefile=input_filename,
+             genuinefile=genuine_filename,
+             bicliquefilename=clique_filename,
+             falsly_added_bicliques=biclique_self_loops.len(),
+             falsly_removed_bicliques=unstored_self_loops.len(),
+             total_edges = node_degrees.iter().fold(0, |sum,i| sum + i),
+             biclique_from_edges = from_bicliques.iter().fold(0, |sum,i| sum + i.len()),
+             biclique_to_edges = to_bicliques.iter().fold(0, |sum,i| sum + i.len()),
+             remaining_edges = adjacency_lists.iter().fold(0, |sum,i| sum + i.len()),
+             number_nodes=node_degrees.len()
              );
 
 
@@ -291,7 +313,7 @@ fn main() {
         None =>  {
             let to_node_bound = std::cmp::max(adjacency_lists.len(), std::cmp::max(max_adjacency_to_node as usize, max_biclique_to_node) + 1); 
             let mut input_vector = vec![1.; to_node_bound];
-            for iter in 0..10 {
+            for iter in 0..30 {
                 let now = Instant::now();
                 let mut output_vector = vec![0.15; to_node_bound];
                 for row_id in 0..adjacency_lists.len() {
